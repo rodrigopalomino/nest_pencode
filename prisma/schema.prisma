@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id   Int      @id @default(autoincrement())
+  name      String   @db.VarChar(65)
+  email     String   @unique @db.VarChar(65)
+  username  String   @unique @db.VarChar(65)
+  password  String   @db.VarChar(65)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pens     Pen[]     @relation("user_pen")
+  comments Comment[] @relation("user_comment")
+  likes    Like[]    @relation("user_like")
+}
+
+model Pen {
+  pen_id      Int    @id @default(autoincrement())
+  tittle      String @db.VarChar(255)
+  description String @db.Text
+  html        String @db.Text
+  js          String @db.Text
+  ccs         String @db.Text
+  categories  String @db.VarChar(255)
+  c_likes     Int    @default(0) @db.Int
+  c_comennt   Int    @default(0) @db.Int
+  c_views     Int    @default(0) @db.Int
+
+  user_id Int
+  user    User @relation("user_pen", fields: [user_id], references: [user_id], onUpdate: Cascade, onDelete: Cascade)
+
+  comments Comment[] @relation("pen_comment")
+  likes    Like[]    @relation("pen_like")
+}
+
+model Comment {
+  comment_id Int    @id @default(autoincrement())
+  comment    String @db.Text
+
+  user_id Int
+  user    User @relation("user_comment", fields: [user_id], references: [user_id], onUpdate: Cascade, onDelete: Cascade)
+
+  pen_id Int
+  pen    Pen @relation("pen_comment", fields: [pen_id], references: [pen_id], onUpdate: Cascade, onDelete: Cascade)
+}
+
+model Like {
+  like_id Int @id @default(autoincrement())
+
+  user_id Int
+  user    User @relation("user_like", fields: [user_id], references: [user_id], onUpdate: Cascade, onDelete: Cascade)
+
+  pen_id Int
+  pen    Pen @relation("pen_like", fields: [pen_id], references: [pen_id], onUpdate: Cascade, onDelete: Cascade)
+}
